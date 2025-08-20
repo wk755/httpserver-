@@ -1,0 +1,2 @@
+/usr/bin/ar qc libhttp_cache.a CMakeFiles/http_cache.dir/src/MemoryCacheLRU.cpp.o CMakeFiles/http_cache.dir/src/CacheMiddleware.cpp.o
+/usr/bin/ranlib libhttp_cache.a

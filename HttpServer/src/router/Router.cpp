@@ -48,7 +48,7 @@ bool Router::route(const HttpRequest &req, HttpResponse *resp)
         {
             // Extract path parameters and add them to the request
             HttpRequest newReq(req); // 因为这里需要额外添加参数，所以新建一个
-            extractPathParameters(match, newReq);
+            extractPathParameters(match, newReq);   
             
             handler->handle(newReq, resp);
             return true;

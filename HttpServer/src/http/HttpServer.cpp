@@ -45,6 +45,7 @@ void HttpServer::initialize()
                   std::placeholders::_1,
                   std::placeholders::_2,
                   std::placeholders::_3));
+    enableResponseCache(128ull*1024*1024, 120, 30);
 }
 
 void HttpServer::setSslConfig(const ssl::SslConfig& config)
@@ -175,6 +176,11 @@ void HttpServer::handleRequest(const HttpRequest &req, HttpResponse *resp)
         HttpRequest mutableReq = req;
         middlewareChain_.processBefore(mutableReq);
 
+        // —— 命中缓存则直接返回 —— 
+        if (cache_ && cache_->before(req, resp)) {
+            return;
+        }
+
         // 路由处理
         if (!router_.route(mutableReq, resp))
         {
@@ -184,20 +190,40 @@ void HttpServer::handleRequest(const HttpRequest &req, HttpResponse *resp)
             resp->setStatusMessage("Not Found");
             resp->setCloseConnection(true);
         }
+
         // 处理响应后的中间件
         middlewareChain_.processAfter(*resp);
+
+        // —— 将最终响应写入缓存（包含 after 中间件加的头，例如 CORS）——
+        if (cache_) {
+            cache_->after(req, *resp);
+        }
     }
-    catch (const HttpResponse& res) 
+    catch (const HttpResponse& res)
     {
-        // 处理中间件抛出的响应（如CORS预检请求）
         *resp = res;
     }
-    catch (const std::exception& e) 
+    catch (const std::exception& e)
     {
-        // 错误处理
         resp->setStatusCode(HttpResponse::k500InternalServerError);
         resp->setBody(e.what());
     }
 }
+
+
+void HttpServer::enableResponseCache(size_t capacityBytes, int ttlSec, int swrSec)
+{
+  using namespace http::cache;
+
+  CachePolicy pol;
+  pol.memoryCapacityBytes   = capacityBytes;               // LRU 容量
+  pol.ttl                   = std::chrono::seconds(ttlSec);// 新鲜命中窗口
+  pol.staleWhileRevalidate  = std::chrono::seconds(swrSec);// 软过期窗口
+  pol.varyAcceptEncoding    = true;                        // 建议开启
+
+  cacheStore_ = std::make_shared<MemoryCacheLRU>(pol.memoryCapacityBytes);
+  cache_      = std::make_shared<CacheMiddleware>(pol, cacheStore_);
+}
+
 
 } // namespace http

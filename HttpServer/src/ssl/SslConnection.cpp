@@ -30,7 +30,6 @@ SslConnection::SslConnection(const TcpConnectionPtr& conn, SslContext* ctx)
         LOG_ERROR << "Failed to create SSL object: " << ERR_error_string(ERR_get_error(), nullptr);
         return;
     }
-
     // 创建 BIO
     readBio_ = BIO_new(BIO_s_mem());
     writeBio_ = BIO_new(BIO_s_mem());
@@ -38,13 +37,11 @@ SslConnection::SslConnection(const TcpConnectionPtr& conn, SslContext* ctx)
     if (!readBio_ || !writeBio_) {
         LOG_ERROR << "Failed to create BIO objects";
         SSL_free(ssl_);
-        ssl_ = nullptr;
+        ssl_ = nullptr; 
         return;
     }
-
     SSL_set_bio(ssl_, readBio_, writeBio_);
     SSL_set_accept_state(ssl_);  // 设置为服务器模式
-    
     // 设置 SSL 选项
     SSL_set_mode(ssl_, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
     SSL_set_mode(ssl_, SSL_MODE_ENABLE_PARTIAL_WRITE);

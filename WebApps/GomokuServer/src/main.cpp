@@ -12,7 +12,6 @@ int main(int argc, char* argv[])
   
   std::string serverName = "HttpServer";
   int port = 80;
-  
   // 参数解析
   int opt;
   const char* str = "p:";

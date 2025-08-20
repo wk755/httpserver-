@@ -3,7 +3,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include "../../../http_cache/include/CacheMiddleware.h"
+#include "../../../http_cache/include/MemoryCacheLRU.h"
+#include "../../../http_cache/include/CachePolicy.h"
 #include <functional>
 #include <iostream>
 #include <map>
@@ -34,6 +36,10 @@ class HttpServer : muduo::noncopyable
 {
 public:
     using HttpCallback = std::function<void (const http::HttpRequest&, http::HttpResponse*)>;
+
+    void enableResponseCache(size_t capacityBytes = 128ull*1024*1024,
+                           int ttlSec = 120,
+                           int swrSec = 30);
     
     // 构造函数
     HttpServer(int port,
@@ -119,7 +125,6 @@ public:
 
 private:
     void initialize();
-
     void onConnection(const muduo::net::TcpConnectionPtr& conn);
     void onMessage(const muduo::net::TcpConnectionPtr& conn,
                    muduo::net::Buffer* buf,
@@ -140,6 +145,8 @@ private:
     bool                                         useSSL_; // 是否使用 SSL   
     // TcpConnectionPtr -> SslConnectionPtr 
     std::map<muduo::net::TcpConnectionPtr, std::unique_ptr<ssl::SslConnection>> sslConns_;
+    std::shared_ptr<http::cache::CacheMiddleware> cache_;
+    std::shared_ptr<http::cache::ICacheStore>     cacheStore_;
 }; 
 
 } // namespace http

@@ -42,8 +42,8 @@ private:
     void handleError(SSLError error);
 
 private:
-    SSL*                ssl_; // SSL 连接
-    SslContext*         ctx_; // SSL 上下文
+    SSL*                ssl_; // SSL 连接,核心对象，保存握手状态、密钥等
+    SslContext*         ctx_; // SSL 上下文，共享的 SslContext，包含证书、私钥、信任根等全局配置
     TcpConnectionPtr    conn_; // TCP 连接
     SSLState            state_; // SSL 状态
     BIO*                readBio_;   // 网络数据 -> SSL

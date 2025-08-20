@@ -1,0 +1,6 @@
+/home/wk/文档/Kama-HTTPServer-main/httpserver-/build/CMakeFiles/simple_server.dir
+/home/wk/文档/Kama-HTTPServer-main/httpserver-/build/CMakeFiles/edit_cache.dir
+/home/wk/文档/Kama-HTTPServer-main/httpserver-/build/CMakeFiles/rebuild_cache.dir
+/home/wk/文档/Kama-HTTPServer-main/httpserver-/build/http_cache/CMakeFiles/http_cache.dir
+/home/wk/文档/Kama-HTTPServer-main/httpserver-/build/http_cache/CMakeFiles/edit_cache.dir
+/home/wk/文档/Kama-HTTPServer-main/httpserver-/build/http_cache/CMakeFiles/rebuild_cache.dir

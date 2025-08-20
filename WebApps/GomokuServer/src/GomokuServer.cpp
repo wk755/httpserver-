@@ -10,6 +10,7 @@
 #include "../../../HttpServer/include/http/HttpRequest.h"
 #include "../../../HttpServer/include/http/HttpResponse.h"
 #include "../../../HttpServer/include/http/HttpServer.h"
+#include <ctime>
 
 using namespace http;
 
@@ -57,6 +58,7 @@ void GomokuServer::initializeMiddleware()
 {
     // 创建中间件
     auto corsMiddleware = std::make_shared<http::middleware::CorsMiddleware>();
+    
     // 添加中间件
     httpServer_.addMiddleware(corsMiddleware);
 }
@@ -91,6 +93,21 @@ void GomokuServer::initializeRouter()
     httpServer_.Get("/backend_data", [this](const http::HttpRequest& req, http::HttpResponse* resp) {
         getBackendData(req, resp);
     });
+    
+    // 用于验证缓存是否命中的测试接口：GET /__cache_test
+    httpServer_.Get("/__cache_test",
+        [](const http::HttpRequest& req, http::HttpResponse* resp) {
+            // 一定要设置完整的状态行（避免 curl 报 HTTP/0.9）
+            resp->setStatusLine("HTTP/1.1", http::HttpResponse::k200Ok, "OK");
+            resp->addHeader("Content-Type", "text/plain; charset=utf-8");
+
+            std::string body = "now=" + std::to_string(::time(nullptr)) + "\n";
+            resp->setBody(body);
+            resp->setContentLength(body.size());
+            resp->setCloseConnection(false);
+    }
+);
+
 }
 
 void GomokuServer::restartChessGameVsAi(const http::HttpRequest &req, http::HttpResponse *resp)
